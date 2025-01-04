@@ -139,7 +139,7 @@ def download_video(url, resolution):
 
 def download_audio(url):
     global pbar
-    print(f"{Fore.YELLOW}Downloading video... Please wait.")
+    print(f"{Fore.YELLOW}Downloading audio... Please wait.")
     ydl_opts = {
         'format': f'bestaudio/best',
         'outtmpl': '%(title)s.%(ext)s',
