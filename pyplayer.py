@@ -25,7 +25,7 @@ BANNER = f"""
 {Style.RESET_ALL}
 """
 
-CACHE_FILE = "video_cache.json"
+CACHE_FILE = "/home/code/MyProjects/YoutubeDownloader/video_cache.json"
 
 
 def load_cache():
@@ -116,11 +116,32 @@ def choose_video(videos):
     return None
 
 
-def download_video(url, resolution="best"):
+def download_video(url, resolution):
     global pbar
     print(f"{Fore.YELLOW}Downloading video... Please wait.")
     ydl_opts = {
         'format': f'bestvideo[height<={resolution}]+bestaudio/best',
+        'outtmpl': '%(title)s.%(ext)s',
+        'progress_hooks': [yt_dlp_progress_hook]
+    }
+    with tqdm(
+        total=100, 
+        desc=f"{Fore.GREEN}Downloading", 
+        bar_format="{l_bar}{bar}| {percentage:.1f}%", 
+        ncols=100,
+        ascii=" █▒░"
+    ) as bar:
+        global pbar
+        pbar = bar
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+
+
+def download_audio(url):
+    global pbar
+    print(f"{Fore.YELLOW}Downloading video... Please wait.")
+    ydl_opts = {
+        'format': f'bestaudio/best',
         'outtmpl': '%(title)s.%(ext)s',
         'progress_hooks': [yt_dlp_progress_hook]
     }
@@ -183,23 +204,28 @@ def main():
         return
 
     print(f"{Fore.GREEN}Selected video URL: {selected_video_url}")
-    action = input(f"{Fore.CYAN}Do you want to (d)ownload or (p)lay the video? (d/p): {Style.RESET_ALL}").strip().lower()
 
-    if action == "d":
-        resolution = input(f"{Fore.CYAN}Enter resolution (e.g., 720, 1080, best): {Style.RESET_ALL}").strip() or "720"
-        download_video(selected_video_url, resolution)
-        cache[selected_video_url] = resolution
-        save_cache(cache)
-    elif action == "p":
-        action_player = input(f"{Fore.CYAN}Do you want to use vlc or mpv? (v/m): {Style.RESET_ALL}").strip().lower()
-        if action_player == "v":
-            install_package("vlc")
-            play_video(selected_video_url, "vlc")
-        elif action_player == "m":
-            install_package("mpv")
-            play_video(selected_video_url, "mpv")
+    format = input(f"{Fore.CYAN}Do you want to download audio or video? (a/v): {Style.RESET_ALL}").strip().lower()
+    if format is "a":
+        download_audio(selected_video_url)
     else:
-        print(f"{Fore.RED}Invalid option. Exiting.")
+        action = input(f"{Fore.CYAN}Do you want to (d)ownload or (p)lay the video? (d/p): {Style.RESET_ALL}").strip().lower()
+
+        if action is "d":
+            resolution = input(f"{Fore.CYAN}Enter resolution (e.g., 720, 1080, best): {Style.RESET_ALL}").strip() or "720"
+            download_video(selected_video_url, resolution)
+            cache[selected_video_url] = resolution
+            save_cache(cache)
+        elif action is "p":
+            action_player = input(f"{Fore.CYAN}Do you want to use vlc or mpv? (v/m): {Style.RESET_ALL}").strip().lower()
+            if action_player == "v":
+                install_package("vlc")
+                play_video(selected_video_url, "vlc")
+            elif action_player is "m":
+                install_package("mpv")
+                play_video(selected_video_url, "mpv")
+        else:
+            print(f"{Fore.RED}Invalid option. Exiting.")
 
 if __name__ == "__main__":
     main()
