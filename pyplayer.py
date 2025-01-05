@@ -206,22 +206,22 @@ def main():
     print(f"{Fore.GREEN}Selected video URL: {selected_video_url}")
 
     format = input(f"{Fore.CYAN}Do you want to download audio or video? (a/v): {Style.RESET_ALL}").strip().lower()
-    if format is "a":
+    if format == "a":
         download_audio(selected_video_url)
     else:
         action = input(f"{Fore.CYAN}Do you want to (d)ownload or (p)lay the video? (d/p): {Style.RESET_ALL}").strip().lower()
 
-        if action is "d":
+        if action == "d":
             resolution = input(f"{Fore.CYAN}Enter resolution (e.g., 720, 1080, best): {Style.RESET_ALL}").strip() or "720"
             download_video(selected_video_url, resolution)
             cache[selected_video_url] = resolution
             save_cache(cache)
-        elif action is "p":
+        elif action == "p":
             action_player = input(f"{Fore.CYAN}Do you want to use vlc or mpv? (v/m): {Style.RESET_ALL}").strip().lower()
             if action_player == "v":
                 install_package("vlc")
                 play_video(selected_video_url, "vlc")
-            elif action_player is "m":
+            elif action_player == "m":
                 install_package("mpv")
                 play_video(selected_video_url, "mpv")
         else:
