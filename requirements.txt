@@ -1,7 +1,4 @@
-tqdm==4.67.1
-colorama==0.4.6
-yt-dlp==2024.12.6
-re
-pytube==15.0.1
-subprocess
-sys
+tqdm
+colorama
+yt-dlp
+pytube
