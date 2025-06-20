@@ -73,7 +73,9 @@ def search_youtube(query, max_results=50):
     try:
         search = Search(query)
         print(f"{Fore.YELLOW}Searching YouTube...")
-        return [(v.title, v.watch_url) for v in search.results[:max_results]]
+        if search.results is not None:
+            return [(v.title, v.watch_url) for v in search.results[:max_results]] 
+        return []
     except Exception as e:
         print(f"{Fore.RED}Search error: {e}")
         return []
