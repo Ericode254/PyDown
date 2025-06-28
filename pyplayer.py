@@ -152,7 +152,7 @@ def main():
         return
 
     print(f"{Fore.GREEN}Selected: {selected_url}")
-    choice = input(f"{Fore.CYAN}Download audio or video? (a/v): ").strip().lower()
+    choice = input(f"{Fore.CYAN}Download audio or video? (a/v): ").strip().lower() or "v"
     if choice == 'a':
         download_audio(selected_url)
         cache[selected_url] = "audio"
