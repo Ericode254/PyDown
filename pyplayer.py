@@ -33,11 +33,11 @@ def load_cache():
             return json.load(f)
     return {}
 
-def save_cache(cache):
+def save_cache(cache: dict[str, str]):
     with open(CACHE_FILE, "w") as f:
         json.dump(cache, f, indent=4)
 
-def is_package_installed(package_name):
+def is_package_installed(package_name: str):
     return subprocess.call(["which", package_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
 
 def detect_package_manager():
@@ -54,7 +54,7 @@ def detect_package_manager():
             return mgr, cmd
     return None, None
 
-def install_package(package_name):
+def install_package(package_name: str):
     if is_package_installed(package_name):
         print(f"{package_name} is already installed.")
         return
@@ -65,11 +65,11 @@ def install_package(package_name):
     else:
         print(f"{Fore.RED}No supported package manager found.")
 
-def is_valid_url(url):
+def is_valid_url(url: str):
     regex = r'(https?://)?(www\.)?(youtube\.com|youtu\.be)/[^\s]+'
     return bool(re.match(regex, url))
 
-def search_youtube(query, max_results=50):
+def search_youtube(query: str, max_results=50):
     try:
         search = Search(query)
         print(f"{Fore.YELLOW}Searching YouTube...")
@@ -80,7 +80,7 @@ def search_youtube(query, max_results=50):
         print(f"{Fore.RED}Search error: {e}")
         return []
 
-def choose_video(videos):
+def choose_video(videos: list[tuple[str,str]]):
     options = [f"{title} | {url}" for title, url in videos]
     result = subprocess.run(["fzf"], input="\n".join(options), text=True, capture_output=True).stdout.strip()
     for title, url in videos:
@@ -99,7 +99,7 @@ def yt_dlp_progress_hook(d):
         pbar.refresh()
         print(f"\n{Fore.GREEN}Download complete!")
 
-def download_video(url, resolution="720"):
+def download_video(url: str, resolution="720"):
     print(f"{Fore.YELLOW}Downloading video...")
     ydl_opts = {
         'format': f'bestvideo[height<={resolution}]+bestaudio/best',
@@ -112,7 +112,7 @@ def download_video(url, resolution="720"):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-def download_audio(url):
+def download_audio(url: str):
     print(f"{Fore.YELLOW}Downloading audio...")
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -125,7 +125,7 @@ def download_audio(url):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-def play_video(url, player):
+def play_video(url: str, player: str):
     print(f"{Fore.YELLOW}Playing with {player}...")
     subprocess.run([player, url])
 
