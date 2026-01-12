@@ -133,45 +133,47 @@ def main():
     print(BANNER)
     cache = load_cache()
 
-    query = sys.argv[1] if len(sys.argv) > 1 else input(f"{Fore.CYAN}Enter YouTube search or URL: {Style.RESET_ALL}").strip()
+    while True:
+        query = sys.argv[1] if len(sys.argv) > 1 else input(f"{Fore.CYAN}Enter YouTube search or URL: {Style.RESET_ALL}").strip()
 
-    if is_valid_url(query):
-        selected_url = query
-    else:
-        videos = search_youtube(query)
-        if not videos:
-            print(f"{Fore.RED}No results found.")
-            return
-        selected_url = choose_video(videos)
-        if not selected_url:
-            print(f"{Fore.RED}No video selected.")
-            return
-
-    if selected_url in cache:
-        print(f"{Fore.GREEN}Already downloaded: {cache[selected_url]}")
-        return
-
-    print(f"{Fore.GREEN}Selected: {selected_url}")
-    choice = input(f"{Fore.CYAN}Download audio or video? (a/v): ").strip().lower() or "v"
-    if choice == 'a':
-        download_audio(selected_url)
-        cache[selected_url] = "audio"
-    else:
-        act = input(f"{Fore.CYAN}Download or play the video? (d/p): ").strip().lower()
-        if act == 'd':
-            res = input(f"{Fore.CYAN}Resolution? (default 720): ").strip() or "720"
-            download_video(selected_url, res)
-            cache[selected_url] = res
-        elif act == 'p':
-            player = input(f"{Fore.CYAN}Use vlc or mpv? (v/m): ").strip().lower()
-            chosen_player = "vlc" if player == 'v' else "mpv"
-            install_package(chosen_player)
-            play_video(selected_url, chosen_player)
+        if is_valid_url(query):
+            selected_url = query
         else:
-            print(f"{Fore.RED}Invalid choice.")
+            videos = search_youtube(query)
+            if not videos:
+                print(f"{Fore.RED}No results found.")
+                return
+            selected_url = choose_video(videos)
+            if not selected_url:
+                print(f"{Fore.RED}No video selected.")
+                return
+
+        if selected_url in cache:
+            print(f"{Fore.GREEN}Already downloaded: {cache[selected_url]}")
             return
 
-    save_cache(cache)
+        print(f"{Fore.GREEN}Selected: {selected_url}")
+        choice = input(f"{Fore.CYAN}Download audio or video? (a/v): ").strip().lower() or "v"
+        if choice == 'a':
+            download_audio(selected_url)
+            cache[selected_url] = "audio"
+        else:
+            act = input(f"{Fore.CYAN}Download or play the video? (d/p): ").strip().lower()
+            if act == 'd':
+                res = input(f"{Fore.CYAN}Resolution? (default 720): ").strip() or "720"
+                download_video(selected_url, res)
+                cache[selected_url] = res
+            elif act == 'p':
+                player = input(f"{Fore.CYAN}Use vlc or mpv? (v/m): ").strip().lower()
+                chosen_player = "vlc" if player == 'v' else "mpv"
+                install_package(chosen_player)
+                play_video(selected_url, chosen_player)
+            else:
+                print(f"{Fore.RED}Invalid choice.")
+                return
+
+        save_cache(cache)
+
 
 if __name__ == "__main__":
     main()
