@@ -88,16 +88,60 @@ def choose_video(videos: list[tuple[str,str]]) -> str | None:
             return url
     return None
 
+pbar = None
 def yt_dlp_progress_hook(d) -> None:
-    if d['status'] == 'downloading':
-        total = d.get('total_bytes') or d.get('total_bytes_estimate', 1)
-        percent = d.get('downloaded_bytes', 0) * 100 // total
-        pbar.n = percent
-        pbar.refresh()
-    elif d['status'] == 'finished':
-        pbar.n = 100
-        pbar.refresh()
-        print(f"\n{Fore.GREEN}Download complete!")
+    global pbar
+
+    if d["status"] == "downloading":
+        total = d.get("total_bytes") or d.get("total_bytes_estimate")
+        downloaded = d.get("downloaded_bytes", 0)
+
+        if total:
+            if pbar is None:
+                pbar = tqdm(
+                    total=total,
+                    unit="B",
+                    unit_scale=True,
+                    desc=f"{Fore.GREEN}Downloading",
+                    ncols=100
+                )
+
+            pbar.n = downloaded
+            pbar.refresh()
+
+    elif d["status"] == "finished":
+        if pbar:
+            pbar.close()
+            pbar = None         
+            print(f"\n{Fore.GREEN}Download complete!")
+
+def download_video_with_subtitle(url: str, resolution="720") -> None:
+    print(f"{Fore.YELLOW}Downloading video...")
+    ydl_opts = {
+        "outtmpl": "%(title)s.%(ext)s",
+        'format': f'bestvideo[height<={resolution}]+bestaudio/best',
+        'progress_hooks': [yt_dlp_progress_hook],
+
+        # Subtitle options
+        "writesubtitles": True,          # download subtitles
+        "writeautomaticsub": True,       # fallback to auto subtitles
+        "subtitleslangs": ["en"],        # language(s)
+        "subtitlesformat": "srt",        # convert to srt
+
+        # Embedding
+        "embedsubtitles": True,
+        "merge_output_format": "mkv",    # strongly recommended
+
+        # FFmpeg
+        "postprocessors": [
+            {
+                "key": "FFmpegEmbedSubtitle",
+            }
+        ],
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
 
 def download_video(url: str, resolution="720") -> None:
     print(f"{Fore.YELLOW}Downloading video...")
@@ -106,11 +150,8 @@ def download_video(url: str, resolution="720") -> None:
         'outtmpl': '%(title)s.%(ext)s',
         'progress_hooks': [yt_dlp_progress_hook]
     }
-    with tqdm(total=100, desc=f"{Fore.GREEN}Downloading", ncols=100, ascii=" █▒░") as bar:
-        global pbar
-        pbar = bar
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
 
 def download_audio(url: str) -> None:
     print(f"{Fore.YELLOW}Downloading audio...")
@@ -119,11 +160,8 @@ def download_audio(url: str) -> None:
         'outtmpl': '%(title)s.%(ext)s',
         'progress_hooks': [yt_dlp_progress_hook]
     }
-    with tqdm(total=100, desc=f"{Fore.GREEN}Downloading", ncols=100, ascii=" █▒░") as bar:
-        global pbar
-        pbar = bar
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
 
 def play_video(url: str, player: str) -> None:
     print(f"{Fore.YELLOW}Playing with {player}...")
@@ -161,7 +199,11 @@ def main():
             act = input(f"{Fore.CYAN}Download or play the video? (d/p): ").strip().lower()
             if act == 'd':
                 res = input(f"{Fore.CYAN}Resolution? (default 720): ").strip() or "720"
-                download_video(selected_url, res)
+                subtitle = input(f"{Fore.CYAN}Do you want to have subtitles too (y/n): ").lower() or "n"
+                if subtitle == "n":
+                    download_video(selected_url, res)
+                else:
+                    download_video_with_subtitle(selected_url, res)
                 cache[selected_url] = res
             elif act == 'p':
                 player = input(f"{Fore.CYAN}Use vlc or mpv? (v/m): ").strip().lower()
