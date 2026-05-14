@@ -1,4 +1,0 @@
-tqdm
-colorama
-yt-dlp
-pytube
