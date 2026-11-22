@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+
+# Downloads
+*.webm
+*.mp4
+*.mkv
+*.m4a
+*.mp3
+*.part
+*.srt
+
+# Editors
+.idea/
